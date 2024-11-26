@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            background: linear-gradient(45deg, #ff5f6d, #ffc371);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .header img {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            width: 50px;
+            height: auto;
+        }
+        .header .user-greeting {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .settings-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .settings-menu li {
+            background: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .settings-menu li:hover {
+            background: #f0f0f0;
+        }
+        .settings-menu li a {
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .settings-menu li a .fa-icon {
+            margin-right: 10px;
+            color: #ff5f6d;
+        }
+        .settings-menu li a:hover .fa-icon {
+            color: #ffc371;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="cropped_image.png" alt="Logo">
+        <h1>Settings</h1>
+        <div class="user-greeting">Hi, RAMANA</div>
+    </div>
+    <div class="container">
+        <ul class="settings-menu">
+            <li><a href="#"><i class="fas fa-bell fa-icon"></i>Alerts</a></li>
+            <li><a href="#"><i class="fas fa-info-circle fa-icon"></i>About Us</a></li>
+            <li><a href="profile.html"><i class="fas fa-user fa-icon"></i>My Profile</a></li>
+            <li><a href="#"><i class="fas fa-phone-alt fa-icon"></i>Contact Us</a></li>
+            <li><a href="#"><i class="fas fa-question-circle fa-icon"></i>Help & Support</a></li>
+            <li><a href="#"><i class="fas fa-comment-dots fa-icon"></i>Feedback</a></li>
+            <li><a href="#"><i class="fas fa-book fa-icon"></i>User Guide</a></li>
+            <li><a href="#"><i class="fas fa-key fa-icon"></i>Change Password</a></li>
+            <li><a href="UserLogin.html" id="logout"><i class="fas fa-sign-out-alt fa-icon"></i>Logout</a></li>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('logout').addEventListener('click', function(event) {
+            event.preventDefault();
+            var userConfirmed = confirm('Are you sure you want to log out?');
+            if (userConfirmed) {
+                window.location.href = 'UserLogin.html'; // Redirect to login page
+            }
+        });
+    </script>
+</body>
+</html>

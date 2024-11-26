@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Train</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #e0f7fa; /* Light cyan background */
+            display: flex;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .navbar {
+            width: 250px;
+            background-color: #00796b; /* Dark teal background */
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+        .navbar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .navbar a:hover {
+            background-color: #004d40; /* Darker teal on hover */
+            transform: translateX(10px);
+        }
+        .navbar a img {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        .container {
+            margin-left: 250px;
+            padding: 20px;
+            flex: 1;
+            position: relative;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        .train {
+            position: absolute;
+            width: 200px;
+            height: 100px;
+            background-color: #007bff;
+            border-radius: 10px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.5s, opacity 0.5s;
+        }
+        .train::before, .train::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #0056b3;
+            border-radius: 50%;
+            bottom: -20px;
+        }
+        .train::before {
+            left: 30px;
+        }
+        .train::after {
+            right: 30px;
+        }
+        .crash {
+            animation: crashAnimation 1s forwards;
+        }
+        @keyframes crashAnimation {
+            0% {
+                transform: translate(-50%, -50%) rotate(0);
+            }
+            50% {
+                transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg) scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="1Adminindex.html">
+            <img src="home.svg" alt="Home Icon"> Home
+        </a>
+        <a href="addTrain.html">
+            <img src="addtrain.webp" alt="Add Train Icon"> Add Train
+        </a>
+        <a href="DeleteTrain.html">
+            <img src="deletetrain.png" alt="Delete Train Icon"> Delete Train
+        </a>
+        <a href="Routes.html">
+            <img src="route.webp" alt="Routes Icon"> Routes
+        </a>
+        <a href="Stations.html">
+            <img src="station.png" alt="Stations Icon"> Stations
+        </a>
+        <a href="Status.html">
+            <img src="status.png" alt="Train Status Icon"> Train Status
+        </a>
+        <a href="AdminRegistration.html">
+            <img src="addadmin.webp" alt="Add Admin Icon"> Add Admin
+        </a>
+    </div>
+    <div class="container">
+        <img src="cropped_image.png" alt="Prasthan Logo" class="logo">
+        <h1>Delete Train</h1>
+        <div class="form-group">
+            <label for="train-number">Train Number</label>
+            <input type="text" id="train-number" name="train-number">
+        </div>
+        <button class="btn" onclick="deleteTrain()">Delete Train</button>
+        <div class="train" id="train"></div>
+    </div>
+    <script>
+        function deleteTrain() {
+            const trainElement = document.getElementById('train');
+            trainElement.classList.add('crash');
+        }
+    </script>
+</body>
+</html>
