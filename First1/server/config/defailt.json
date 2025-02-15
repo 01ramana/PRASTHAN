@@ -1,0 +1,10 @@
+{
+    "server":"localhost",
+    "port":3306,
+    "database":"prasthan",
+    "username":"root",
+    "password":"manager",
+    "httpport":"9898",
+    "jwtkey":"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+
+}

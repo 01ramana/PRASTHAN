@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background: linear-gradient(45deg, #ff5f6d, #ffc371);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .payment-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .payment-methods {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .payment-method {
+            width: 48%;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .payment-method img {
+            max-width: 60%;
+        }
+        .payment-form {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .submit-button {
+            background-color: #4caf50;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .submit-button:hover {
+            background-color: #45a049;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 40px;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .popup-message {
+            background-color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            width: 50%;
+        }
+        .popup-message img {
+            width: 50px;
+            margin-bottom: 20px;
+        }
+        .popup-message h4 {
+            color: #4caf50;
+        }
+        .popup-message p {
+            font-size: 16px;
+            color: #777;
+        }
+        .close-popup {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Payment Gateway</h1>
+    </div>
+
+    <div class="payment-container">
+        <h3>Choose Your Payment Method</h3>
+
+        <div class="payment-methods">
+            <div class="payment-method">
+                <h4>Debit/Credit Card</h4>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Visa_Logo_2023.svg/800px-Visa_Logo_2023.svg.png" alt="Visa Logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/MasterCard_logo.svg/1024px-MasterCard_logo.svg.png" alt="MasterCard Logo">
+            </div>
+            <div class="payment-method">
+                <h4>UPI Payment</h4>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/UPI_logo.svg/1200px-UPI_logo.svg.png" alt="UPI Logo" style="max-width: 50%;">
+            </div>
+        </div>
+
+        <div class="payment-form">
+            <h4>Enter Your Payment Details</h4>
+            <form id="payment-form">
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="text" id="card-number" placeholder="1234 5678 9101 1121" required>
+                </div>
+                <div class="form-group">
+                    <label for="expiry-date">Expiry Date</label>
+                    <input type="text" id="expiry-date" placeholder="MM/YY" required>
+                </div>
+                <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="password" id="cvv" placeholder="123" required>
+                </div>
+
+                <button type="button" class="submit-button" onclick="processPayment()">Pay Now</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Prasthan. All Rights Reserved.</p>
+    </div>
+
+    <div class="popup" id="popup">
+        <div class="popup-message">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Prasthan_logo.png/1200px-Prasthan_logo.png" alt="Prasthan Logo">
+            <h4>Payment Successful!</h4>
+            <p>You will receive your ticket shortly via message and email.</p>
+            <button class="close-popup" onclick="closePopup()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function processPayment() {
+            // For now, we simulate a successful payment.
+            document.getElementById("popup").style.display = "flex";
+        }
+
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Details</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(45deg, #ff5f6d, #ffc371);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .details-container {
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .train-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .train-info h2 {
+            margin-bottom: 10px;
+        }
+        .train-info p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .form-container {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+        .submit-button {
+            background-color: #4caf50;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .submit-button:hover {
+            background-color: #45a049;
+        }
+        .passenger-form {
+            margin-bottom: 15px;
+        }
+        .remove-passenger-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .remove-passenger-btn:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Passenger Details</h1>
+    </div>
+
+    <div class="details-container">
+        <div class="train-info">
+            <h2>Train Details</h2>
+            <p><strong>Train Name:</strong> Express Train 101</p>
+            <p><strong>Train Number:</strong> 101A</p>
+            <p><strong>Class:</strong> Sleeper Class</p>
+            <p><strong>Departure:</strong> 2024-11-22, 18:00</p>
+            <p><strong>Arrival:</strong> 2024-11-22, 22:30</p>
+            <p><strong>Seat:</strong> 25A (Available)</p>
+        </div>
+
+        <div class="form-container">
+            <h4>Enter Passenger Details</h4>
+            <form id="passenger-form">
+                <div id="passenger-forms-container">
+                    <!-- Multiple passenger input forms will go here -->
+                    <div class="passenger-form" id="passenger-0">
+                        <h5>Passenger 1</h5>
+                        <div class="form-group">
+                            <label for="name-0">Full Name</label>
+                            <input type="text" id="name-0" name="name-0" value="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="age-0">Age</label>
+                            <input type="number" id="age-0" name="age-0" value="30">
+                        </div>
+                        <div class="form-group">
+                            <label for="gender-0">Gender</label>
+                            <select id="gender-0" name="gender-0">
+                                <option value="Male" selected>Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-0">Contact Number</label>
+                            <input type="tel" id="contact-0" name="contact-0" value="9876543210">
+                        </div>
+                        <hr>
+                    </div>
+
+                    <div class="passenger-form" id="passenger-1">
+                        <h5>Passenger 2</h5>
+                        <div class="form-group">
+                            <label for="name-1">Full Name</label>
+                            <input type="text" id="name-1" name="name-1" value="Jane Smith">
+                        </div>
+                        <div class="form-group">
+                            <label for="age-1">Age</label>
+                            <input type="number" id="age-1" name="age-1" value="28">
+                        </div>
+                        <div class="form-group">
+                            <label for="gender-1">Gender</label>
+                            <select id="gender-1" name="gender-1">
+                                <option value="Male">Male</option>
+                                <option value="Female" selected>Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-1">Contact Number</label>
+                            <input type="tel" id="contact-1" name="contact-1" value="9123456789">
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+                
+                <button type="button" class="submit-button" onclick="bookNow()">Book Now</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Train booking details are managed by the IRCTC system.</p>
+    </div>
+
+    <script>
+        // Dummy train and passenger details have already been set in the form
+
+        // Function to handle 'Book Now' action (navigating to review page)
+        function bookNow() {
+            // For now, we're just navigating to a review page (e.g., review.html)
+            // You can add more logic here if needed (e.g., storing details, validation, etc.)
+            window.location.href = "payments.html"; // Change this to your actual review page
+        }
+    </script>
+</body>
+</html>

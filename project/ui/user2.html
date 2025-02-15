@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Booking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff;
+        }
+        .header {
+            background: linear-gradient(45deg, #3b5998, #8b9dc3);
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .train-list {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .train-item {
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+            position: relative;
+        }
+        .train-item:last-child {
+            border-bottom: none;
+        }
+        .train-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: #444;
+        }
+        .train-time {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .class-options {
+            display: flex;
+            justify-content: space-around;
+        }
+        .class-options button {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f8f9fa;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .class-options button:hover {
+            background: #ddd;
+            transform: scale(1.1);
+        }
+        .availability {
+            margin-top: 10px;
+            font-size: 14px;
+            color: green;
+            display: none;
+        }
+        .availability.show {
+            display: block;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+        .book-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background: linear-gradient(145deg, #ff9800, #ff5722);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .book-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Pune Jn to Tandur</h1>
+        <p>Train Availability - Nov 20, 2024</p>
+    </div>
+
+    <div class="train-list" id="train-list">
+        <!-- Train items dynamically added here -->
+    </div>
+
+    <button class="book-button" id="book-journey" onclick="bookJourney()" disabled>
+        Book Journey
+    </button>
+
+    <div class="footer">
+        <p>Train timings and availability are subject to change. Please verify via IRCTC or NTES.</p>
+    </div>
+
+    <script>
+        // Dummy train data
+        const trains = [
+            { name: "Shatabdi Exp", number: "12025", departure: "06:00", arrival: "12:18", duration: "6h 18m" },
+            { name: "RJT SC SUP Exp", number: "22717", departure: "21:15", arrival: "04:29", duration: "7h 14m" },
+            { name: "Konark Exp", number: "11019", departure: "18:00", arrival: "01:29", duration: "7h 29m" },
+            { name: "Hyderabad Exp", number: "22732", departure: "19:00", arrival: "01:30", duration: "6h 30m" }
+        ];
+
+        // Dynamic pricing for each train
+        const dynamicPricing = {
+            "12025": { SL: 400, "3A": 900, "2A": 1400, "1A": 2200, CC: 1800 },
+            "22717": { SL: 350, "3A": 850, "2A": 1350, "1A": 2150, CC: 1750 },
+            "11019": { SL: 300, "3A": 800, "2A": 1300, "1A": 2100, CC: 1700 },
+            "22732": { SL: 320, "3A": 820, "2A": 1320, "1A": 2120, CC: 1720 }
+        };
+
+        let selectedTrain = null;
+
+        const trainListContainer = document.getElementById("train-list");
+
+        // Generate train items
+        trains.forEach((train) => {
+            const trainItem = document.createElement("div");
+            trainItem.className = "train-item";
+
+            trainItem.innerHTML = `
+                <div class="train-header">
+                    <span>${train.name} (${train.number})</span>
+                </div>
+                <div class="train-time">
+                    Departure: ${train.departure} | Arrival: ${train.arrival} | Duration: ${train.duration}
+                </div>
+                <div class="class-options">
+                    <button onclick="showClassDetails('${train.number}', 'SL')">SL</button>
+                    <button onclick="showClassDetails('${train.number}', '3A')">3A</button>
+                    <button onclick="showClassDetails('${train.number}', '2A')">2A</button>
+                    <button onclick="showClassDetails('${train.number}', '1A')">1A</button>
+                    <button onclick="showClassDetails('${train.number}', 'CC')">CC</button>
+                </div>
+                <div class="availability" id="availability-${train.number}"></div>
+            `;
+
+            trainListContainer.appendChild(trainItem);
+        });
+
+        // Show class details on button click
+        function showClassDetails(trainNumber, classType) {
+            // Hide previous availability messages
+            document.querySelectorAll(".availability").forEach((el) => el.classList.remove("show"));
+
+            // Mark this train as selected
+            selectedTrain = { trainNumber, classType };
+
+            // Enable the "Book Journey" button
+            document.getElementById("book-journey").disabled = false;
+
+            const details = dynamicPricing[trainNumber];
+            const availabilityDiv = document.getElementById(`availability-${trainNumber}`);
+            availabilityDiv.innerHTML = `
+                Class: ${classType} | Price: ₹${details[classType]} | Status: Available
+            `;
+            availabilityDiv.classList.add("show");
+        }
+
+        // Book Journey action
+        function bookJourney() {
+            if (selectedTrain) {
+                // Save selected train and seat to localStorage
+                localStorage.setItem("selectedTrain", JSON.stringify(selectedTrain));
+                alert("are u confirm with the train");
+                window.location.href = "User3.html";
+            } else {
+                alert("Please select a train and class first.");
+            }
+        }
+    </script>
+</body>
+</html>

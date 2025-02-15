@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Stations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f3a683, #ff7675);
+            display: flex;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .navbar {
+            width: 250px;
+            background: linear-gradient(135deg, #232526, #414345);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+        }
+        .navbar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+            margin: 10px;
+            border-radius: 5px;
+        }
+        .navbar a:hover {
+            background-color: #575757;
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .navbar a img {
+            width: 20px;
+            margin-right: 10px;
+        }
+        .container {
+            margin-left: 250px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .form-group {
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+            animation: rotate 10s infinite linear;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .content {
+            text-align: center;
+            color: #333;
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: textGlow 1.5s infinite alternate;
+        }
+        @keyframes textGlow {
+            from { text-shadow: 0 0 5px #fff, 0 0 10px #ff7675, 0 0 15px #ff7675, 0 0 20px #ff7675; }
+            to { text-shadow: 0 0 10px #fff, 0 0 20px #ff7675, 0 0 30px #ff7675, 0 0 40px #ff7675; }
+        }
+        p {
+            font-size: 1.2rem;
+        }
+        .stations-list {
+            margin-top: 20px;
+            text-align: left;
+            width: 100%;
+            max-width: 500px;
+        }
+        .station {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="1Adminindex.html">
+            <img src="home.svg" alt="Home Icon"> Home
+        </a>
+        <a href="addTrain.html">
+            <img src="addtrain.webp" alt="Add Train Icon"> Add Train
+        </a>
+        <a href="DeleteTrain.html">
+            <img src="deletetrain.png" alt="Delete Train Icon"> Delete Train
+        </a>
+        <a href="Routes.html">
+            <img src="route.webp" alt="Routes Icon"> Routes
+        </a>
+        <a href="Stations.html">
+            <img src="station.png" alt="Stations Icon"> Stations
+        </a>
+        <a href="Status.html">
+            <img src="status.png" alt="Train Status Icon"> Train Status
+        </a>
+        <a href="AdminRegistration.html">
+            <img src="addadmin.webp" alt="Add Admin Icon"> Add Admin
+        </a>
+    </div>
+    <div class="container">
+        <img src="cropped_image.png" alt="Prasthan Logo" class="logo">
+        <div class="content">
+            <h1>Add Stations</h1>
+            <form id="stationForm">
+                <div class="form-group">
+                    <label for="trainNumber">Train Number:</label>
+                    <input type="text" id="trainNumber" name="trainNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="stationName">Station Name:</label>
+                    <input type="text" id="stationName" name="stationName" required>
+                </div>
+                <button type="submit" class="btn">Add Station</button>
+            </form>
+            <div class="stations-list" id="stationsList">
+                <!-- Dynamically added stations will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('stationForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const trainNumber = document.getElementById('trainNumber').value;
+            const stationName = document.getElementById('stationName').value;
+
+            // Code to handle adding the station
+            console.log(`Train Number: ${trainNumber}, Station Name: ${stationName}`);
+            
+            const stationDiv = document.createElement('div');
+            stationDiv.className = 'station';
+            stationDiv.textContent = `Train Number: ${trainNumber}, Station: ${stationName}`;
+            document.getElementById('stationsList').appendChild(stationDiv);
+
+            // Clear the form fields
+            document.getElementById('stationForm').reset();
+        });
+    </script>
+</body>
+</html>

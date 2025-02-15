@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Document</title>
+    <link rel="stylesheet" href="bootstrap.min.css" />
+    <script src="jquery-3.7.1.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="table-responsive">
+        <table class="table table-bordered" style="margin-top: 20px">
+          <tbody>
+            <tr>
+              <td colspan="2">
+                <input type="hidden" id="txtNo" />
+              </td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>
+                <input type="text" id="txtName" />
+              </td>
+            </tr>
+
+            <tr>
+              <td>Email</td>
+              <td>
+                <input type="text" id="txtEmail" />
+              </td>
+            </tr>
+            <tr>
+              <td>Password</td>
+              <td>
+                <input type="text" id="txtPassword" />
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button class="btn btn-primary" id="btnAdd" onclick="Add()">
+                  Add Record
+                </button>
+
+                <button class="btn btn-info" id="btnUpdate" onclick="Update()">
+                  Update Record
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div
+        id="divMessage"
+        class="alert alert-success"
+        style="color: black; font-weight: bolder; opacity: 1"
+      ></div>
+      <div class="table-responsive">
+        <table class="table table-bordered" style="margin-top: 10px">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Password</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      var url = `http://localhost:9898/Admins`;
+      var isUpdating = false;
+
+      function GetData() {
+        var helper = new XMLHttpRequest();
+        helper.onreadystatechange = () => {
+          if (helper.readyState == 4 && helper.status == 200) {
+            var admins = JSON.parse(helper.responseText);
+            var refTotableBody = document.getElementById("tableBody");
+            refTotableBody.innerHTML = "";
+            for (let i = 0; i < admins.length; i++) {
+              let admin = admins[i];
+              var row = `<tr>
+                                <td>${admin.No}</td>
+                                <td>${admin.Name}</td>
+                                <td>${admin.Email}</td>
+                                <td>${admin.password}</td>
+                                <td>
+                                    <button class="btn btn-warning" onclick="Edit(${admin.No})">Edit</button>
+                                </td>
+                                 <td>
+                                    <button class="btn btn-danger" onclick="Delete(${admin.No})">Delete</button>
+                                </td>
+                         </tr>`;
+              refTotableBody.innerHTML = refTotableBody.innerHTML + row;
+            }
+          }
+        };
+        helper.open("GET", url);
+        helper.send();
+      }
+
+      function Edit(No) {
+        var helper = new XMLHttpRequest();
+        helper.onreadystatechange = () => {
+          if (helper.readyState == 4 && helper.status == 200) {
+            var result = JSON.parse(helper.responseText);
+            if (result.length > 0) {
+              isUpdating = true;
+              ToggleUI();
+              var refToTxtNo = document.getElementById("txtNo");
+              var refToTxtName = document.getElementById("txtName");
+              var refToTxtEmail = document.getElementById("txtEmail");
+              var refToTxtPassword = document.getElementById("txtPassword");
+
+              var adminFound = result[0];
+              refToTxtNo.value = No;
+              refToTxtName.value = adminFound.Name;
+              refToTxtEmail.value=adminFound.Email;
+              refToTxtPassword.value=adminFound.password;
+            }
+          }
+        };
+        helper.open("GET", url + "/" + No);
+        helper.send();
+      }
+
+      function Update() {
+        var refToTxtNo = document.getElementById("txtNo");
+        var refToTxtName = document.getElementById("txtName");
+        var refToTxtEmail = document.getElementById("txtEmail");
+        var refToTxtPassword = document.getElementById("txtPassword");
+
+
+
+        var updatedRecord = {
+          Name: refToTxtName.value,
+          Email:refToTxtEmail.value,
+          password:refToTxtPassword.value
+        };
+
+        var recordInStringFormat = JSON.stringify(updatedRecord);
+
+        var helper = new XMLHttpRequest();
+        helper.onreadystatechange = () => {
+          if (helper.readyState == 4 && helper.status == 200) {
+            var result = JSON.parse(helper.responseText);
+            if (
+              result.affectedRows != null ||
+              result.affectedRows != undefined
+            ) {
+              SetMessage("Record Updated!");
+              if (result.affectedRows > 0) {
+                ClearBoxes();
+                isUpdating = false;
+                ToggleUI();
+                GetData();
+              }
+            }
+          }
+        };
+        helper.open("PUT", url + "/" + refToTxtNo.value);
+        helper.setRequestHeader("content-type", "application/json");
+        helper.send(recordInStringFormat);
+      }
+
+      function Delete(No) {
+        var helper = new XMLHttpRequest();
+        helper.onreadystatechange = () => {
+          if (helper.readyState == 4 && helper.status == 200) {
+            var result = JSON.parse(helper.responseText);
+            SetMessage("Record Deleted!");
+            GetData();
+          }
+        };
+        helper.open("DELETE", url + "/" + No);
+        helper.send();
+      }
+
+      function Add() {
+        var refToTxtName = document.getElementById("txtName");
+        var refToTxtEmail = document.getElementById("txtEmail");
+        var refToTxtPassword = document.getElementById("txtPassword");
+        var newRecord = {
+          Name: refToTxtName.value,
+          Email:refToTxtEmail.value,
+          password:refToTxtPassword.value
+        };
+
+        var recordInStringFormat = JSON.stringify(newRecord);
+
+        var helper = new XMLHttpRequest();
+        helper.onreadystatechange = () => {
+          if (helper.readyState == 4 && helper.status == 200) {
+            var result = JSON.parse(helper.responseText);
+            if (
+              result.affectedRows != null ||
+              result.affectedRows != undefined
+            ) {
+              SetMessage("Record Added!");
+              if (result.affectedRows > 0) {
+                ClearBoxes();
+                GetData();
+              }
+            }
+          }
+        };
+        helper.open("POST", url);
+        helper.setRequestHeader("content-type", "application/json");
+        helper.send(recordInStringFormat);
+      }
+
+      function ClearBoxes() {
+        var refToTxtNo = document.getElementById("txtNo");
+        var refToTxtName = document.getElementById("txtName");
+        var refToTxtEmail = document.getElementById("txtEmail");
+        var refToTxtPassword = document.getElementById("txtPassword");
+        refToTxtNo.value = "";
+        refToTxtName.value = "";
+        refToTxtEmail.value = "";
+        refToTxtPassword.value = "";
+        
+      }
+
+      function ToggleUI() {
+        var refToBtnAdd = document.getElementById("btnAdd");
+        var refToBtnUpdate = document.getElementById("btnUpdate");
+
+        if (isUpdating == false) {
+          refToBtnAdd.disabled = null;
+          refToBtnUpdate.disabled = "disabled";
+        } else {
+          refToBtnAdd.disabled = "disabled";
+          refToBtnUpdate.disabled = null;
+        }
+      }
+
+      function SetMessage(message) {
+        var refTodivMessage = document.getElementById("divMessage");
+        refTodivMessage.style.opacity = 1;
+        refTodivMessage.innerText = message;
+        setTimeout(() => {
+          refTodivMessage.style.opacity = 0;
+          refTodivMessage.innerText = "";
+        }, 3000);
+      }
+
+      GetData();
+      ToggleUI();
+    </script>
+  </body>
+</html>
