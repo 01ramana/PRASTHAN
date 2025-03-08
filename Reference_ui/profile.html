@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Body and general layout */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background: linear-gradient(135deg, #6e7dff, #8e44ad);
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 250px;
+            height: 100%;
+            background-color: #2c3e50;
+            padding-top: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .sidebar .logo {
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .sidebar .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar .nav-links a:hover {
+            color: #f39c12;
+        }
+
+        .sidebar .nav-links a i {
+            font-size: 20px;
+        }
+
+        /* Main content (profile details) */
+        .main-content {
+            margin-left: 250px;
+            padding: 40px;
+            width: calc(100% - 250px);
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        /* Profile container styling */
+        .profile-container {
+            background: #fff;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 800px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-container img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 4px solid #8e44ad;
+        }
+
+        .profile-container h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .profile-container p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .profile-container .info-item {
+            display: flex;
+            align-items: center;
+            justify-content: start;
+            margin: 15px 0;
+        }
+
+        .profile-container .info-item i {
+            color: #8e44ad;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+
+        .profile-container .info-item .info-text {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .profile-container .btn {
+            display: inline-block;
+            background-color: #8e44ad;
+            padding: 12px 25px;
+            color: white;
+            border-radius: 5px;
+            font-size: 18px;
+            text-decoration: none;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .profile-container .btn:hover {
+            background-color: #6e7dff;
+        }
+
+        .profile-container .btn:active {
+            background-color: #5e3a8d;
+        }
+
+        /* For small screen responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+                width: calc(100% - 200px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Section -->
+    <div class="sidebar">
+        <div class="logo">My Profile</div>
+        <div class="nav-links">
+            <a href="user1.html"><i class="fas fa-home fa-icon"></i>Home</a>
+            <a href="booking.html"><i class="fas fa-ticket-alt fa-icon"></i>Bookings</a>
+            <a href="cancel.html"><i class="fas fa-ban fa-icon"></i>Cancellations</a>
+            <a href="profile.html"><i class="fas fa-user-circle"></i> Profile</a>
+            <a href="UeditProfile.html"><i class="fas fa-edit"></i> Edit Profile</a>
+            <a href="settings.html"><i class="fas fa-cogs"></i> Settings</a>
+            <a href="UserLogin.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Content (Profile Details) -->
+    <div class="main-content">
+        <!-- Profile Container -->
+        <div class="profile-container">
+            <!-- Profile Picture -->
+            <img src="cropped_image.png" alt="Logo">
+
+            <!-- User Info -->
+            <h2>Hi, <span id="user-name">RAMANA</span></h2>
+            <p>Welcome to your profile!</p>
+
+            <!-- Profile Details -->
+            <div class="info-item">
+                <i class="fas fa-user-circle"></i>
+                <span class="info-text" id="user-email">Email: ramana@example.com</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span class="info-text" id="user-address">Address: 123, Main Street, City, Country</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-phone"></i>
+                <span class="info-text" id="user-phone">Phone: +1234567890</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="info-text" id="user-dob">DOB: 15 Aug 1990</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-id-badge"></i>
+                <span class="info-text" id="user-id">User ID: RAM12345</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-venus-mars"></i>
+                <span class="info-text" id="user-gender">Gender: Male</span>
+            </div>
+
+            <!-- Edit Profile Button -->
+            <a href="UeditProfile.html" class="btn">Edit Profile</a>
+        </div>
+    </div>
+
+    <script>
+        // Check if the profile data is stored in localStorage
+        window.onload = function() {
+            const userInfo = JSON.parse(localStorage.getItem('userProfile')) || {
+                name: 'RAMANA',
+                email: 'ramana@example.com',
+                address: '123, Main Street, City, Country',
+                phone: '+91 9573228649',
+                dob: '16 May 2002',
+                userId: 'rammzz0976',
+                gender: 'Male'
+            };
+
+            // Update the profile details dynamically
+            document.getElementById('user-name').textContent = userInfo.name;
+            document.getElementById('user-email').textContent = 'Email: ' + userInfo.email;
+            document.getElementById('user-address').textContent = 'Address: ' + userInfo.address;
+            document.getElementById('user-phone').textContent = 'Phone: ' + userInfo.phone;
+            document.getElementById('user-dob').textContent = 'DOB: ' + userInfo.dob;
+            document.getElementById('user-id').textContent = 'User ID: ' + userInfo.userId;
+            document.getElementById('user-gender').textContent = 'Gender: ' + userInfo.gender;
+        }
+    </script>
+</body>
+</html>

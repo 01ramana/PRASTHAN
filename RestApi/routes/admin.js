@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const config = require('config');
+const fs = require('fs')
 
 const app = express.Router();
 app.use(express.json());
@@ -11,6 +12,9 @@ const connectionDetails = {
     password: config.get("password"),
     database: config.get("dbname"),
     port: config.get("port"),
+    ssl:{
+        ca: fs.readFileSync(config.get("ca")),
+    }
 };
 
 // GET all admins

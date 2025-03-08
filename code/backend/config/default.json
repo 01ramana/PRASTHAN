@@ -1,9 +1,0 @@
-{
-    "host"    : "localhost",
-    "user"     : "root",
-    "password" : "manager",
-    "dbname" : "trainreservationsystem",
-    "port": 3306,
-    "httpport": 9999
-
-}

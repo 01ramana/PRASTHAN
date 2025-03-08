@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0e9cb2, rgb(79, 79, 75));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 300px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            margin-right: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group input:focus {
+            border-color: #ff9d00;
+            outline: none;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background: #ff9d00;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn:hover {
+            background: #e68a00;
+        }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="cropped_image.png" alt="Prasthan Logo" class="logo">
+        <h2>User Login</h2>
+        <form id="adminLoginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn">Sign In</button>
+        </form>
+        <p><a href="forgotpassword.html">Forgot password?</a></p>
+    </div>
+
+    <!-- Popup for confirmation -->
+    <div id="popup" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; text-align: center;">
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+            <h2>Login Successful!</h2>
+            <h3><wait class=""></wait></h3>
+        </div>
+    </div>
+
+    <script>
+        // Listen for form submission
+        document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Show the popup
+            document.getElementById('popup').style.display = 'flex';
+
+            // Close the popup and redirect after 3 seconds
+            setTimeout(function() {
+                closePopup();
+                // Redirect to user1.html
+                window.location.href = 'user1.html';
+            }, 3000); // 3 seconds
+        });
+
+        // Close the popup
+        function closePopup() {
+            // Hide the popup
+            document.getElementById('popup').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
