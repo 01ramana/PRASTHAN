@@ -27,7 +27,7 @@ app.use("/",bookingRoutes);
 app.use("/",adminFunctionRoutes);
 app.use("/schedule",scheduleRoutes);
 // Start the server
-const httpPort = config.get("httpport");
-app.listen(httpPort, () => {
-    console.log(`Server is running on http://localhost:${httpPort}`);
+const port = config.get("port");
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
 });

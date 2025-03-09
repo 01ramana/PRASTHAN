@@ -5,51 +5,47 @@ const config = require('config');
 const app = express.Router();
 app.use(express.json());
 
-const connectionDetails = {
+// Create a MySQL connection pool
+const pool = mysql.createPool({
     host: config.get("host"),
     user: config.get("user"),
     password: config.get("password"),
     database: config.get("dbname"),
     port: config.get("port"),
-};
+    waitForConnections: true,
+    connectionLimit: 10, // Adjust based on load
+    queueLimit: 0
+});
 
 // ADD a new route
 app.post("/", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
+    const { RouteId, TrainNo, StationNo } = req.body;
+
+    if (!RouteId || !TrainNo || !StationNo) {
+        return res.status(400).json({ error: "RouteId, TrainNo, and StationNo are required" });
+    }
 
     const queryText = `INSERT INTO Route (RouteId, TrainNo, StationNo) VALUES (?, ?, ?)`;
-    connection.query(
-        queryText,
-        [req.body.RouteId, req.body.TrainNo, req.body.StationNo],
-        (error, result) => {
-            res.setHeader("content-type", "application/json");
-            if (!error) {
-                res.json(result);
-            } else {
-                console.error(error);
-                res.status(500).json(error);
-            }
-            connection.end();
+
+    pool.query(queryText, [RouteId, TrainNo, StationNo], (error, result) => {
+        if (error) {
+            console.error("Error inserting route:", error);
+            return res.status(500).json({ error: "Failed to add route" });
         }
-    );
+        res.status(201).json({ success: true, message: "Route added successfully", data: result });
+    });
 });
 
 // GET all routes
 app.get("/", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
     const queryText = `SELECT * FROM Route`;
-    connection.query(queryText, (error, result) => {
-        res.setHeader("content-type", "application/json");
-        if (!error) {
-            res.json(result);
-        } else {
-            console.error(error);
-            res.status(500).json(error);
+
+    pool.query(queryText, (error, result) => {
+        if (error) {
+            console.error("Error fetching routes:", error);
+            return res.status(500).json({ error: "Failed to retrieve routes" });
         }
-        connection.end();
+        res.json({ success: true, data: result });
     });
 });
 
@@ -62,28 +58,19 @@ app.put("/:RouteId", (req, res) => {
         return res.status(400).json({ error: "TrainNo and StationNo are required for update" });
     }
 
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
     const queryText = `UPDATE Route SET TrainNo = ?, StationNo = ? WHERE RouteId = ?`;
-    connection.query(
-        queryText,
-        [TrainNo, StationNo, RouteId],
-        (error, result) => {
-            res.setHeader("content-type", "application/json");
-            if (!error) {
-                if (result.affectedRows > 0) {
-                    res.json({ success: true, message: "Route updated successfully" });
-                } else {
-                    res.status(404).json({ error: "Route not found" });
-                }
-            } else {
-                console.error(error);
-                res.status(500).json(error);
-            }
-            connection.end();
+
+    pool.query(queryText, [TrainNo, StationNo, RouteId], (error, result) => {
+        if (error) {
+            console.error("Error updating route:", error);
+            return res.status(500).json({ error: "Failed to update route" });
         }
-    );
+        if (result.affectedRows > 0) {
+            res.json({ success: true, message: "Route updated successfully" });
+        } else {
+            res.status(404).json({ error: "Route not found" });
+        }
+    });
 });
 
 module.exports = app;

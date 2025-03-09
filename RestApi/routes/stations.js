@@ -5,43 +5,41 @@ const config = require('config');
 const app = express.Router();
 app.use(express.json());
 
-const connectionDetails = {
+const pool = mysql.createPool({
     host: config.get("host"),
     user: config.get("user"),
     password: config.get("password"),
     database: config.get("dbname"),
     port: config.get("port"),
-};
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
 
 // ADD a new station
 app.post("/", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
+    const { Name, TrainNo } = req.body;
+
+    if (!Name || !TrainNo) {
+        return res.status(400).json({ error: "Name and TrainNo are required" });
+    }
 
     const queryText = `INSERT INTO Station (Name, TrainNo) VALUES (?, ?)`;
-    connection.query(
-        queryText,
-        [req.body.Name, req.body.TrainNo],
-        (error, result) => {
-            res.setHeader("content-type", "application/json");
-            if (!error) {
-                res.json({ message: "Station added successfully!", result });
-            } else {
-                console.error(error);
-                res.status(500).json(error);
-            }
-            connection.end();
+    pool.query(queryText, [Name, TrainNo], (error, result) => {
+        res.setHeader("content-type", "application/json");
+        if (!error) {
+            res.json({ message: "Station added successfully!", result });
+        } else {
+            console.error(error);
+            res.status(500).json(error);
         }
-    );
+    });
 });
 
 // GET all stations
 app.get("/", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
     const queryText = `SELECT * FROM Station`;
-    connection.query(queryText, (error, result) => {
+    pool.query(queryText, (error, result) => {
         res.setHeader("content-type", "application/json");
         if (!error) {
             res.json(result);
@@ -49,21 +47,17 @@ app.get("/", (req, res) => {
             console.error(error);
             res.status(500).json(error);
         }
-        connection.end();
     });
 });
 
 // GET station by StationNo
 app.get("/:id", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
     const queryText = `SELECT * FROM Station WHERE StationNo = ?`;
-    connection.query(queryText, [req.params.id], (error, result) => {
+    pool.query(queryText, [req.params.id], (error, result) => {
         res.setHeader("content-type", "application/json");
         if (!error) {
             if (result.length > 0) {
-                res.json(result[0]); // Return the station object if found
+                res.json(result[0]);
             } else {
                 res.status(404).json({ message: "Station not found" });
             }
@@ -71,47 +65,48 @@ app.get("/:id", (req, res) => {
             console.error(error);
             res.status(500).json(error);
         }
-        connection.end();
     });
 });
 
 // UPDATE a station
 app.put("/:id", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
+    const { Name, TrainNo } = req.body;
+
+    if (!Name || !TrainNo) {
+        return res.status(400).json({ error: "Name and TrainNo are required" });
+    }
 
     const queryText = `UPDATE Station SET Name = ?, TrainNo = ? WHERE StationNo = ?`;
-    connection.query(
-        queryText,
-        [req.body.Name, req.body.TrainNo, req.params.id],
-        (error, result) => {
-            res.setHeader("content-type", "application/json");
-            if (!error) {
-                res.json({ message: "Station updated successfully!", result });
-            } else {
-                console.error(error);
-                res.status(500).json(error);
-            }
-            connection.end();
-        }
-    );
-});
-
-// DELETE a station
-app.delete("/:id", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
-    const queryText = `DELETE FROM Station WHERE StationNo = ?`;
-    connection.query(queryText, [req.params.id], (error, result) => {
+    pool.query(queryText, [Name, TrainNo, req.params.id], (error, result) => {
         res.setHeader("content-type", "application/json");
         if (!error) {
-            res.json({ message: "Station deleted successfully!", result });
+            if (result.affectedRows > 0) {
+                res.json({ message: "Station updated successfully!", result });
+            } else {
+                res.status(404).json({ error: "Station not found" });
+            }
         } else {
             console.error(error);
             res.status(500).json(error);
         }
-        connection.end();
+    });
+});
+
+// DELETE a station
+app.delete("/:id", (req, res) => {
+    const queryText = `DELETE FROM Station WHERE StationNo = ?`;
+    pool.query(queryText, [req.params.id], (error, result) => {
+        res.setHeader("content-type", "application/json");
+        if (!error) {
+            if (result.affectedRows > 0) {
+                res.json({ message: "Station deleted successfully!", result });
+            } else {
+                res.status(404).json({ error: "Station not found" });
+            }
+        } else {
+            console.error(error);
+            res.status(500).json(error);
+        }
     });
 });
 

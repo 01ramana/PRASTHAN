@@ -5,92 +5,76 @@ const config = require('config');
 const app = express.Router();
 app.use(express.json());
 
-const connectionDetails = {
+// Create a connection pool
+const pool = mysql.createPool({
     host: config.get("host"),
     user: config.get("user"),
     password: config.get("password"),
     database: config.get("dbname"),
     port: config.get("port"),
-};
-// GET train details by Source and Destination
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// **GET all train details**
+app.get("/", (req, res) => {
+    const queryText = `SELECT * FROM Train`;
+
+    pool.query(queryText, (error, result) => {
+        res.setHeader("content-type", "application/json");
+        if (error) {
+            console.error("Database error:", error);
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json(result);
+    });
+});
+
+// **GET train by TrainNo**
+app.get("/:TrainNo", (req, res) => {
+    const TrainNo = req.params.TrainNo;
+    const queryText = `SELECT * FROM Train WHERE TrainNo = ?`;
+
+    pool.query(queryText, [TrainNo], (error, result) => {
+        res.setHeader("content-type", "application/json");
+        if (error) {
+            console.error("Database error:", error);
+            return res.status(500).json({ error: "Database error" });
+        }
+        if (result.length > 0) {
+            res.json(result[0]);
+        } else {
+            res.status(404).json({ error: "Train not found" });
+        }
+    });
+});
+
+// **GET train details by Source and Destination**
 app.get("/search", (req, res) => {
     const { Source, Destination } = req.query;
-
-    console.log("Received search request:", { Source, Destination }); // Debugging log
 
     if (!Source || !Destination) {
         return res.status(400).json({ error: "Both Source and Destination are required" });
     }
 
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
+    const queryText = `SELECT * FROM Train WHERE Source = ? AND Destination = ?`;
 
-    const queryText = `SELECT * FROM Train WHERE Source LIKE ? AND Destination LIKE ?`;
-    const queryParams = [`%${Source}%`, `%${Destination}%`];
-
-    console.log("Executing SQL:", queryText, queryParams); // Debugging log
-
-    connection.query(queryText, queryParams, (error, result) => {
-        res.setHeader("content-type", "application/json");
-        if (!error) {
-            console.log("Search results:", result); // Debugging log
-            if (result.length > 0) {
-                res.json(result);
-            } else {
-                res.status(404).json({ error: "No trains found for the given Source and Destination" });
-            }
-        } else {
-            console.error("Database error:", error);
-            res.status(500).json({ error: "Database error" });
-        }
-        connection.end();
-    });
-});
-// GET all train details
-app.get("/", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
-    const queryText = `SELECT * FROM Train`;
-    connection.query(queryText, (error, result) => {
-        res.setHeader("content-type", "application/json");
-        if (!error) {
-            res.json(result);
-        } else {
-            console.error(error);
-            res.status(500).json({ error: "Database error" });
-        }
-        connection.end();
-    });
-});
-
-// GET train details by TrainNo
-app.get("/:TrainNo", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
-    const TrainNo = req.params.TrainNo;
-    console.log("Fetching train with TrainNo:", TrainNo); // Debug log
-
-    const queryText = `SELECT * FROM Train WHERE TrainNo = ?`;
-    connection.query(queryText, [TrainNo], (error, result) => {
+    pool.query(queryText, [Source, Destination], (error, result) => {
         res.setHeader("content-type", "application/json");
         if (error) {
-            console.error("Database error:", error); // Debug error log
+            console.error("Database error:", error);
             return res.status(500).json({ error: "Database error" });
         }
-
-        console.log("Query result:", result); // Debug query result
         if (result.length > 0) {
-            res.json(result[0]); // Return the first matching record
+            res.json(result);
         } else {
-            res.status(404).json({ error: "Train not found" });
+            res.status(404).json({ error: "No trains found for the given Source and Destination" });
         }
-        connection.end();
     });
 });
 
-// ADD a new train
+// **ADD a new train**
 app.post("/", (req, res) => {
     const { TrainNo, ArrivalTime, DepartureTime, Destination, Source, Date } = req.body;
 
@@ -98,30 +82,22 @@ app.post("/", (req, res) => {
         return res.status(400).json({ error: "All fields are required" });
     }
 
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
     const queryText = `
         INSERT INTO Train (TrainNo, ArrivalTime, DepartureTime, Destination, Source, Date)
         VALUES (?, ?, ?, ?, ?, ?)
     `;
-    connection.query(
-        queryText,
-        [TrainNo, ArrivalTime, DepartureTime, Destination, Source, Date],
-        (error, result) => {
-            res.setHeader("content-type", "application/json");
-            if (!error) {
-                res.json({ success: true, data: result });
-            } else {
-                console.error(error);
-                res.status(500).json({ error: "Database error" });
-            }
-            connection.end();
+
+    pool.query(queryText, [TrainNo, ArrivalTime, DepartureTime, Destination, Source, Date], (error, result) => {
+        res.setHeader("content-type", "application/json");
+        if (error) {
+            console.error("Database error:", error);
+            return res.status(500).json({ error: "Database error" });
         }
-    );
+        res.json({ success: true, message: "Train added successfully", data: result });
+    });
 });
 
-// UPDATE train details
+// **UPDATE train details**
 app.put("/:TrainNo", (req, res) => {
     const { ArrivalTime, DepartureTime, Destination, Source, Date } = req.body;
     const TrainNo = req.params.TrainNo;
@@ -130,33 +106,23 @@ app.put("/:TrainNo", (req, res) => {
         return res.status(400).json({ error: "All fields are required for update" });
     }
 
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
     const queryText = `
         UPDATE Train SET ArrivalTime = ?, DepartureTime = ?, Destination = ?, Source = ?, Date = ?
         WHERE TrainNo = ?
     `;
-    connection.query(
-        queryText,
-        [ArrivalTime, DepartureTime, Destination, Source, Date, TrainNo],
-        (error, result) => {
-            res.setHeader("content-type", "application/json");
-            if (!error) {
-                if (result.affectedRows > 0) {
-                    res.json({ success: true, message: "Train updated successfully" });
-                } else {
-                    res.status(404).json({ error: "Train not found" });
-                }
-            } else {
-                console.error(error);
-                res.status(500).json({ error: "Database error" });
-            }
-            connection.end();
+
+    pool.query(queryText, [ArrivalTime, DepartureTime, Destination, Source, Date, TrainNo], (error, result) => {
+        res.setHeader("content-type", "application/json");
+        if (error) {
+            console.error("Database error:", error);
+            return res.status(500).json({ error: "Database error" });
         }
-    );
+        if (result.affectedRows > 0) {
+            res.json({ success: true, message: "Train updated successfully" });
+        } else {
+            res.status(404).json({ error: "Train not found" });
+        }
+    });
 });
-
-
 
 module.exports = app;

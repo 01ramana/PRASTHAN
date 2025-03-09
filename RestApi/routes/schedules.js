@@ -1,145 +1,98 @@
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const config = require('config');
 
 const app = express.Router();
 app.use(express.json());
 
-const connectionDetails = {
+// Create a connection pool
+const pool = mysql.createPool({
     host: config.get("host"),
     user: config.get("user"),
     password: config.get("password"),
     database: config.get("dbname"),
     port: config.get("port"),
-};
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+});
 
 // GET all schedules
-app.get("/", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
-    const queryText = `SELECT * FROM Schedule`;
-    connection.query(queryText, (error, result) => {
-        res.setHeader("content-type", "application/json");
-        if (!error) {
-            res.json(result);
-        } else {
-            console.error(error);
-            res.status(500).json({ error: "Database error" });
-        }
-        connection.end();
-    });
+app.get("/", async (req, res) => {
+    try {
+        const [rows] = await pool.query(`SELECT * FROM Schedule`);
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database error" });
+    }
 });
 
 // GET schedule by TrainNo
-app.get("/train/:TrainNo", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
-    const queryText = `SELECT * FROM Schedule WHERE TrainNo = ?`;
-    connection.query(queryText, [req.params.TrainNo], (error, result) => {
-        res.setHeader("content-type", "application/json");
-        if (!error) {
-            if (result.length > 0) {
-                res.json(result);
-            } else {
-                res.status(404).json({ error: "No schedule found for this TrainNo" });
-            }
-        } else {
-            console.error(error);
-            res.status(500).json(error);
-        }
-        connection.end();
-    });
+app.get("/train/:TrainNo", async (req, res) => {
+    try {
+        const [rows] = await pool.query(`SELECT * FROM Schedule WHERE TrainNo = ?`, [req.params.TrainNo]);
+        rows.length > 0 ? res.json(rows) : res.status(404).json({ error: "No schedule found for this TrainNo" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database error" });
+    }
 });
 
 // GET schedule by StationNo
-app.get("/station/:StationNo", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
-    const queryText = `SELECT * FROM Schedule WHERE StationNo = ?`;
-    connection.query(queryText, [req.params.StationNo], (error, result) => {
-        res.setHeader("content-type", "application/json");
-        if (!error) {
-            if (result.length > 0) {
-                res.json(result);
-            } else {
-                res.status(404).json({ error: "No schedule found for this StationNo" });
-            }
-        } else {
-            console.error(error);
-            res.status(500).json(error);
-        }
-        connection.end();
-    });
+app.get("/station/:StationNo", async (req, res) => {
+    try {
+        const [rows] = await pool.query(`SELECT * FROM Schedule WHERE StationNo = ?`, [req.params.StationNo]);
+        rows.length > 0 ? res.json(rows) : res.status(404).json({ error: "No schedule found for this StationNo" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database error" });
+    }
 });
 
 // ADD a new schedule
-app.post("/", (req, res) => {
+app.post("/", async (req, res) => {
     const { ScheduleId, TrainNo, StationNo, ArrivalTime, DepartureTime } = req.body;
 
     if (!ScheduleId || !TrainNo || !StationNo || !ArrivalTime || !DepartureTime) {
         return res.status(400).json({ error: "All fields are required" });
     }
 
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-
-    const queryText = `
-        INSERT INTO Schedule (ScheduleId, TrainNo, StationNo, ArrivalTime, DepartureTime)
-        VALUES (?, ?, ?, ?, ?)
-    `;
-    connection.query(
-        queryText,
-        [ScheduleId, TrainNo, StationNo, ArrivalTime, DepartureTime],
-        (error, result) => {
-            res.setHeader("content-type", "application/json");
-            if (!error) {
-                res.json({ success: true, data: result });
-            } else {
-                console.error(error);
-                res.status(500).json({ error: "Database error" });
-            }
-            connection.end();
-        }
-    );
+    try {
+        const [result] = await pool.query(
+            `INSERT INTO Schedule (ScheduleId, TrainNo, StationNo, ArrivalTime, DepartureTime) VALUES (?, ?, ?, ?, ?)`,
+            [ScheduleId, TrainNo, StationNo, ArrivalTime, DepartureTime]
+        );
+        res.json({ success: true, insertId: result.insertId });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database error" });
+    }
 });
 
 // UPDATE schedule by ScheduleId
-app.put("/:ScheduleId", (req, res) => {
+app.put("/:ScheduleId", async (req, res) => {
     const { TrainNo, StationNo, ArrivalTime, DepartureTime } = req.body;
-    const ScheduleId = req.params.ScheduleId;
+    const { ScheduleId } = req.params;
 
     if (!TrainNo || !StationNo || !ArrivalTime || !DepartureTime) {
         return res.status(400).json({ error: "All fields are required for update" });
     }
 
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
+    try {
+        const [result] = await pool.query(
+            `UPDATE Schedule SET TrainNo = ?, StationNo = ?, ArrivalTime = ?, DepartureTime = ? WHERE ScheduleId = ?`,
+            [TrainNo, StationNo, ArrivalTime, DepartureTime, ScheduleId]
+        );
 
-    const queryText = `
-        UPDATE Schedule SET TrainNo = ?, StationNo = ?, ArrivalTime = ?, DepartureTime = ?
-        WHERE ScheduleId = ?
-    `;
-    connection.query(
-        queryText,
-        [TrainNo, StationNo, ArrivalTime, DepartureTime, ScheduleId],
-        (error, result) => {
-            res.setHeader("content-type", "application/json");
-            if (!error) {
-                if (result.affectedRows > 0) {
-                    res.json({ success: true, message: "Schedule updated successfully" });
-                } else {
-                    res.status(404).json({ error: "Schedule not found" });
-                }
-            } else {
-                console.error(error);
-                res.status(500).json({ error: "Database error" });
-            }
-            connection.end();
-        }
-    );
+        result.affectedRows > 0
+            ? res.json({ success: true, message: "Schedule updated successfully" })
+            : res.status(404).json({ error: "Schedule not found" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database error" });
+    }
 });
 
 module.exports = app;

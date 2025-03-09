@@ -1,109 +1,92 @@
 const express = require('express');
 const mysql = require('mysql2');
 const config = require('config');
-const fs = require('fs')
+const fs = require('fs');
 
 const app = express.Router();
 app.use(express.json());
 
-const connectionDetails = {
+// Create a MySQL connection pool
+const pool = mysql.createPool({
     host: config.get("host"),
     user: config.get("user"),
     password: config.get("password"),
     database: config.get("dbname"),
     port: config.get("port"),
-    ssl:{
+    ssl: {
         ca: fs.readFileSync(config.get("ca")),
-    }
-};
+    },
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
 
 // GET all admins
 app.get("/", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-    const queryText = `SELECT * FROM Admin`;
-
-    connection.query(queryText, (error, result) => {
+    pool.query("SELECT * FROM Admin", (error, results) => {
         res.setHeader("content-type", "application/json");
         if (!error) {
-            res.json(result);
+            res.json(results);
         } else {
-            console.error(error);
+            console.error("Database Query Error:", error);
             res.status(500).json(error);
         }
-        connection.end();
     });
 });
 
 // GET admin by AdminId
 app.get("/:AdminId", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-    const queryText = `SELECT * FROM Admin WHERE AdminId = ?`;
-
-    connection.query(queryText, [req.params.AdminId], (error, result) => {
+    pool.query("SELECT * FROM Admin WHERE AdminId = ?", [req.params.AdminId], (error, results) => {
         res.setHeader("content-type", "application/json");
         if (!error) {
-            res.json(result);
+            res.json(results);
         } else {
-            console.error(error);
+            console.error("Database Query Error:", error);
             res.status(500).json(error);
         }
-        connection.end();
     });
 });
 
 // POST new admin
 app.post("/", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-    const queryText = `INSERT INTO Admin (Name, EmailId, Password) VALUES (?, ?, ?)`;
-
-    connection.query(queryText, [req.body.Name, req.body.EmailId, req.body.Password], (error, result) => {
+    const { Name, EmailId, Password } = req.body;
+    pool.query("INSERT INTO Admin (Name, EmailId, Password) VALUES (?, ?, ?)", [Name, EmailId, Password], (error, result) => {
         res.setHeader("content-type", "application/json");
         if (!error) {
-            res.json(result);
+            res.json({ message: "Admin added successfully", result });
         } else {
-            console.error(error);
+            console.error("Database Insert Error:", error);
             res.status(500).json(error);
         }
-        connection.end();
     });
 });
 
 // PUT update admin
 app.put("/:AdminId", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-    const queryText = `UPDATE Admin SET Name = ?, EmailId = ?, Password = ? WHERE AdminId = ?`;
-
-    connection.query(queryText, [req.body.Name, req.body.EmailId, req.body.Password, req.params.AdminId], (error, result) => {
-        res.setHeader("content-type", "application/json");
-        if (!error) {
-            res.json(result);
-        } else {
-            console.error(error);
-            res.status(500).json(error);
+    const { Name, EmailId, Password } = req.body;
+    pool.query("UPDATE Admin SET Name = ?, EmailId = ?, Password = ? WHERE AdminId = ?", 
+        [Name, EmailId, Password, req.params.AdminId], (error, result) => {
+            res.setHeader("content-type", "application/json");
+            if (!error) {
+                res.json({ message: "Admin updated successfully", result });
+            } else {
+                console.error("Database Update Error:", error);
+                res.status(500).json(error);
+            }
         }
-        connection.end();
-    });
+    );
 });
 
 // DELETE admin by AdminId
 app.delete("/:AdminId", (req, res) => {
-    const connection = mysql.createConnection(connectionDetails);
-    connection.connect();
-    const queryText = `DELETE FROM Admin WHERE AdminId = ?`;
-
-    connection.query(queryText, [req.params.AdminId], (error, result) => {
+    pool.query("DELETE FROM Admin WHERE AdminId = ?", [req.params.AdminId], (error, result) => {
         res.setHeader("content-type", "application/json");
         if (!error) {
-            res.json(result);
+            res.json({ message: "Admin deleted successfully", result });
         } else {
-            console.error(error);
+            console.error("Database Delete Error:", error);
             res.status(500).json(error);
         }
-        connection.end();
     });
 });
 

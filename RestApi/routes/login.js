@@ -1,31 +1,22 @@
 const mysql = require('mysql2');
 const express = require('express');
-const config = require('config'); // Import the config module
+const config = require('config');
 
 const app = express.Router();
 
 // Middleware to parse JSON
 app.use(express.json());
 
-// Define connection details using config.get
-const connectionDetails = {
+// Create a connection pool for better performance
+const pool = mysql.createPool({
     host: config.get("host"),
     user: config.get("user"),
     password: config.get("password"),
     database: config.get("dbname"),
     port: config.get("port"),
-};
-
-// Create a connection to the MySQL database
-const connection = mysql.createConnection(connectionDetails);
-
-// Connect to the database
-connection.connect((err) => {
-    if (err) {
-        console.error('Error connecting to the database:', err.message);
-    } else {
-        console.log('Connected to the MySQL database.');
-    }
+    waitForConnections: true,
+    connectionLimit: 10, // Set limit as per your requirement
+    queueLimit: 0
 });
 
 // Login Route
@@ -34,7 +25,7 @@ app.post("/", (request, response) => {
 
     // Validate input
     if (!email || !password) {
-        return response.status(400).send({ error: "Email and password are required" });
+        return response.status(400).json({ error: "Email and password are required" });
     }
 
     // SQL query to fetch user details
@@ -44,37 +35,42 @@ app.post("/", (request, response) => {
         SELECT UserId AS Id, Name, EmailId, Password, 'user' AS UserType FROM user WHERE EmailId = ?;
     `;
 
-    // Execute query
-    connection.query(statement, [email, email], (err, results) => {
+    // Get a connection from the pool and execute query
+    pool.getConnection((err, connection) => {
         if (err) {
-            console.error("Database error:", err);
-            return response.status(500).send({ error: "Internal server error" });
+            console.error("Database connection error:", err);
+            return response.status(500).json({ error: "Database connection failed" });
         }
 
-        // Check if user exists
-        if (results.length === 0) {
-            return response.status(404).send({ error: "No user found with the provided email" });
-        }
+        connection.query(statement, [email, email], (err, results) => {
+            connection.release(); // Release the connection back to the pool
 
-        const user = results[0]; // Get the first user from the results
-        console.log("User retrieved:", user);
+            if (err) {
+                console.error("Database query error:", err);
+                return response.status(500).json({ error: "Internal server error" });
+            }
 
-        // Check if the password matches
-        if (password === user.Password) {
-            // Respond with user details
-            return response.status(200).send({
-                success: true,
-                data: {
-                    id: user.Id,
-                    name: user.Name,
-                    email: user.EmailId,
-                    userType: user.UserType,
-                },
-            });
-        } else {
-            // Password mismatch
-            return response.status(401).send({ error: "Invalid credentials" });
-        }
+            if (results.length === 0) {
+                return response.status(404).json({ error: "No user found with the provided email" });
+            }
+
+            const user = results[0];
+            console.log("User retrieved:", user);
+
+            if (password === user.Password) {
+                return response.status(200).json({
+                    success: true,
+                    data: {
+                        id: user.Id,
+                        name: user.Name,
+                        email: user.EmailId,
+                        userType: user.UserType,
+                    },
+                });
+            } else {
+                return response.status(401).json({ error: "Invalid credentials" });
+            }
+        });
     });
 });
 
