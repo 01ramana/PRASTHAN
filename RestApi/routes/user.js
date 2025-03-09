@@ -1,23 +1,29 @@
 const express = require('express');
 const mysql = require('mysql2/promise'); // Use promise-based MySQL for async/await
-const config = require('config');
+const dotenv = require('dotenv');
+const fs = require('fs');
 const bcrypt = require('bcrypt');
+
+dotenv.config(); // Load environment variables
 
 const app = express.Router();
 app.use(express.json());
 
 const pool = mysql.createPool({
-    host: config.get("host"),
-    user: config.get("user"),
-    password: config.get("password"),
-    database: config.get("dbname"),
-    port: config.get("port"),
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
+    ssl: {
+        ca: fs.readFileSync(process.env.CA_CERT), // Load CA file
+    }
 });
 
-// GET all users
+// **GET all users**
 app.get("/", async (req, res) => {
     try {
         const [rows] = await pool.query(`SELECT * FROM User`);
@@ -28,7 +34,7 @@ app.get("/", async (req, res) => {
     }
 });
 
-// GET user by UserId
+// **GET user by UserId**
 app.get("/:UserId", async (req, res) => {
     try {
         const [rows] = await pool.query(`SELECT * FROM User WHERE UserId = ?`, [req.params.UserId]);
@@ -43,7 +49,7 @@ app.get("/:UserId", async (req, res) => {
     }
 });
 
-// POST new user (Register)
+// **POST new user (Register)**
 app.post("/", async (req, res) => {
     try {
         const { Name, Gender, Age, MobileNo, City, State, Pincode, EmailId, Password } = req.body;
@@ -75,7 +81,7 @@ app.post("/", async (req, res) => {
     }
 });
 
-// DELETE user by UserId
+// **DELETE user by UserId**
 app.delete("/:UserId", async (req, res) => {
     try {
         const [result] = await pool.query(`DELETE FROM User WHERE UserId = ?`, [req.params.UserId]);

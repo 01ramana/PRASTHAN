@@ -1,17 +1,22 @@
+require('dotenv').config();  // ✅ Load .env variables
+
 const express = require('express');
 const mysql = require('mysql2');
-const config = require('config');
+const fs = require('fs');
 
 const app = express.Router();
 app.use(express.json());
 
 // Create a MySQL connection pool
 const pool = mysql.createPool({
-    host: config.get("host"),
-    user: config.get("user"),
-    password: config.get("password"),
-    database: config.get("dbname"),
-    port: config.get("port"),
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
+    ssl: {
+        ca: fs.readFileSync(process.env.CA_CERT), // ✅ Use env variable
+    },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -25,7 +30,7 @@ app.get('/booking/:BookingId', (req, res) => {
         if (!error) {
             res.json(results);
         } else {
-            console.error(error);
+            console.error("Database Query Error:", error);
             res.status(500).json(error);
         }
     });
@@ -49,8 +54,8 @@ app.post('/ticket', (req, res) => {
         if (!error) {
             res.status(201).json({ message: "Ticket booked successfully", BookingId: result.insertId });
         } else {
-            console.error('Error executing query:', error);
-            res.status(500).json({ message: "Internal Server Error", error });
+            console.error("Database Insert Error:", error);
+            res.status(500).json(error);
         }
     });
 });
@@ -65,7 +70,7 @@ app.post('/cancellation', (req, res) => {
         if (!error) {
             res.status(201).json({ message: "Booking canceled successfully", CancellationId: result.insertId });
         } else {
-            console.error(error);
+            console.error("Database Insert Error:", error);
             res.status(500).json(error);
         }
     });
@@ -79,7 +84,7 @@ app.get('/payment/:BookingId', (req, res) => {
         if (!error) {
             res.json(results);
         } else {
-            console.error(error);
+            console.error("Database Query Error:", error);
             res.status(500).json(error);
         }
     });
@@ -107,7 +112,7 @@ app.get("/schedules", (req, res) => {
         if (!error) {
             res.json(results);
         } else {
-            console.error(error);
+            console.error("Database Query Error:", error);
             res.status(500).json(error);
         }
     });
@@ -136,7 +141,7 @@ app.get("/tickets/:UserId", (req, res) => {
         if (!error) {
             res.json(results);
         } else {
-            console.error(error);
+            console.error("Database Query Error:", error);
             res.status(500).json(error);
         }
     });
@@ -161,7 +166,7 @@ app.get('/route/:TrainNo', (req, res) => {
         if (!error) {
             res.json(results);
         } else {
-            console.error(error);
+            console.error("Database Query Error:", error);
             res.status(500).json(error);
         }
     });

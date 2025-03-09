@@ -1,6 +1,7 @@
+require('dotenv').config();  // ✅ Load .env variables globally
+
 const express = require('express');
 const mysql = require('mysql2');
-const config = require('config');
 const fs = require('fs');
 
 const app = express.Router();
@@ -8,17 +9,25 @@ app.use(express.json());
 
 // Create a MySQL connection pool
 const pool = mysql.createPool({
-    host: config.get("host"),
-    user: config.get("user"),
-    password: config.get("password"),
-    database: config.get("dbname"),
-    port: config.get("port"),
-    ssl: {
-        ca: fs.readFileSync(config.get("ca")),
-    },
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
+    ssl: process.env.CA_CERT ? { ca: fs.readFileSync(process.env.CA_CERT) } : undefined, // ✅ Prevent crash if CA_CERT is missing
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
+});
+
+// ✅ Check if the database connection works
+pool.getConnection((err, connection) => {
+    if (err) {
+        console.error("❌ MySQL Connection Failed:", err);
+    } else {
+        console.log("✅ MySQL Connected Successfully");
+        connection.release();
+    }
 });
 
 // GET all admins

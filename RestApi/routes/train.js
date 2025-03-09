@@ -1,20 +1,24 @@
-const express = require('express');
-const mysql = require('mysql2');
-const config = require('config');
+const express = require("express");
+const mysql = require("mysql2");
+const fs = require("fs");
+require("dotenv").config();
 
 const app = express.Router();
 app.use(express.json());
 
-// Create a connection pool
+// Create a connection pool with SSL CA file
 const pool = mysql.createPool({
-    host: config.get("host"),
-    user: config.get("user"),
-    password: config.get("password"),
-    database: config.get("dbname"),
-    port: config.get("port"),
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    ssl: {
+        ca: fs.readFileSync(process.env.CA_CERT),
+    },
 });
 
 // **GET all train details**

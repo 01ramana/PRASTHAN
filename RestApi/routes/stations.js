@@ -1,22 +1,28 @@
+require('dotenv').config(); // ✅ Load .env variables
+
 const express = require('express');
 const mysql = require('mysql2');
-const config = require('config');
+const fs = require('fs');
 
 const app = express.Router();
 app.use(express.json());
 
+// ✅ Create MySQL connection pool with SSL
 const pool = mysql.createPool({
-    host: config.get("host"),
-    user: config.get("user"),
-    password: config.get("password"),
-    database: config.get("dbname"),
-    port: config.get("port"),
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
+    ssl: {
+        ca: fs.readFileSync(process.env.CA_CERT) // ✅ Load CA cert from .env
+    },
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
 });
 
-// ADD a new station
+// ✅ ADD a new station
 app.post("/", (req, res) => {
     const { Name, TrainNo } = req.body;
 
@@ -26,49 +32,45 @@ app.post("/", (req, res) => {
 
     const queryText = `INSERT INTO Station (Name, TrainNo) VALUES (?, ?)`;
     pool.query(queryText, [Name, TrainNo], (error, result) => {
-        res.setHeader("content-type", "application/json");
+        res.setHeader("Content-Type", "application/json");
         if (!error) {
             res.json({ message: "Station added successfully!", result });
         } else {
-            console.error(error);
-            res.status(500).json(error);
+            console.error("Error inserting station:", error);
+            res.status(500).json({ error: "Database error" });
         }
     });
 });
 
-// GET all stations
+// ✅ GET all stations
 app.get("/", (req, res) => {
     const queryText = `SELECT * FROM Station`;
     pool.query(queryText, (error, result) => {
-        res.setHeader("content-type", "application/json");
+        res.setHeader("Content-Type", "application/json");
         if (!error) {
             res.json(result);
         } else {
-            console.error(error);
-            res.status(500).json(error);
+            console.error("Error fetching stations:", error);
+            res.status(500).json({ error: "Database error" });
         }
     });
 });
 
-// GET station by StationNo
+// ✅ GET station by StationNo
 app.get("/:id", (req, res) => {
     const queryText = `SELECT * FROM Station WHERE StationNo = ?`;
     pool.query(queryText, [req.params.id], (error, result) => {
-        res.setHeader("content-type", "application/json");
+        res.setHeader("Content-Type", "application/json");
         if (!error) {
-            if (result.length > 0) {
-                res.json(result[0]);
-            } else {
-                res.status(404).json({ message: "Station not found" });
-            }
+            result.length > 0 ? res.json(result[0]) : res.status(404).json({ error: "Station not found" });
         } else {
-            console.error(error);
-            res.status(500).json(error);
+            console.error("Error fetching station:", error);
+            res.status(500).json({ error: "Database error" });
         }
     });
 });
 
-// UPDATE a station
+// ✅ UPDATE a station
 app.put("/:id", (req, res) => {
     const { Name, TrainNo } = req.body;
 
@@ -78,34 +80,30 @@ app.put("/:id", (req, res) => {
 
     const queryText = `UPDATE Station SET Name = ?, TrainNo = ? WHERE StationNo = ?`;
     pool.query(queryText, [Name, TrainNo, req.params.id], (error, result) => {
-        res.setHeader("content-type", "application/json");
+        res.setHeader("Content-Type", "application/json");
         if (!error) {
-            if (result.affectedRows > 0) {
-                res.json({ message: "Station updated successfully!", result });
-            } else {
-                res.status(404).json({ error: "Station not found" });
-            }
+            result.affectedRows > 0
+                ? res.json({ message: "Station updated successfully!", result })
+                : res.status(404).json({ error: "Station not found" });
         } else {
-            console.error(error);
-            res.status(500).json(error);
+            console.error("Error updating station:", error);
+            res.status(500).json({ error: "Database error" });
         }
     });
 });
 
-// DELETE a station
+// ✅ DELETE a station
 app.delete("/:id", (req, res) => {
     const queryText = `DELETE FROM Station WHERE StationNo = ?`;
     pool.query(queryText, [req.params.id], (error, result) => {
-        res.setHeader("content-type", "application/json");
+        res.setHeader("Content-Type", "application/json");
         if (!error) {
-            if (result.affectedRows > 0) {
-                res.json({ message: "Station deleted successfully!", result });
-            } else {
-                res.status(404).json({ error: "Station not found" });
-            }
+            result.affectedRows > 0
+                ? res.json({ message: "Station deleted successfully!", result })
+                : res.status(404).json({ error: "Station not found" });
         } else {
-            console.error(error);
-            res.status(500).json(error);
+            console.error("Error deleting station:", error);
+            res.status(500).json({ error: "Database error" });
         }
     });
 });

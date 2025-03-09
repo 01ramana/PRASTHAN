@@ -1,17 +1,22 @@
+require('dotenv').config();  // ✅ Load .env variables
+
 const express = require('express');
 const mysql = require('mysql2');
-const config = require('config');
+const fs = require('fs');
 
 const app = express.Router();
 app.use(express.json());
 
 // Create a connection pool
 const pool = mysql.createPool({
-    host: config.get("host"),
-    user: config.get("user"),
-    password: config.get("password"),
-    database: config.get("dbname"),
-    port: config.get("port"),
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
+    ssl: {
+        ca: fs.readFileSync(process.env.CA_CERT), // ✅ Use env variable
+    },
     waitForConnections: true,
     connectionLimit: 10,  // Adjust as needed
     queueLimit: 0
@@ -27,7 +32,7 @@ app.post("/train", (req, res) => {
         if (!error) {
             res.status(201).json({ message: "Train added successfully", TrainId: result.insertId });
         } else {
-            console.error(error);
+            console.error("Database Insert Error:", error);
             res.status(500).json(error);
         }
     });
@@ -42,7 +47,7 @@ app.get("/train/:TrainNo", (req, res) => {
         if (!error) {
             res.json(result);
         } else {
-            console.error(error);
+            console.error("Database Query Error:", error);
             res.status(500).json(error);
         }
     });
@@ -58,7 +63,7 @@ app.post("/station", (req, res) => {
         if (!error) {
             res.status(201).json({ message: "Station added successfully", StationId: result.insertId });
         } else {
-            console.error(error);
+            console.error("Database Insert Error:", error);
             res.status(500).json(error);
         }
     });
@@ -73,7 +78,7 @@ app.get("/station/:TrainNo", (req, res) => {
         if (!error) {
             res.json(result);
         } else {
-            console.error(error);
+            console.error("Database Query Error:", error);
             res.status(500).json(error);
         }
     });
@@ -88,7 +93,7 @@ app.delete("/train/:TrainNo", (req, res) => {
         if (!error) {
             res.json({ message: "Train deleted successfully" });
         } else {
-            console.error(error);
+            console.error("Database Delete Error:", error);
             res.status(500).json(error);
         }
     });
@@ -103,7 +108,7 @@ app.delete("/station/:StationNo", (req, res) => {
         if (!error) {
             res.json({ message: "Station deleted successfully" });
         } else {
-            console.error(error);
+            console.error("Database Delete Error:", error);
             res.status(500).json(error);
         }
     });
